@@ -1,5 +1,6 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+from flask_marshmallow import Marshmallow  
 
 # Create Flask service.
 app = Flask(__name__)
@@ -13,6 +14,9 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # Create database object using app config dictionary
 db = SQLAlchemy(app)
 
+# Create JSON deserializer
+ma = Marshmallow(app)
+
 # Class for template of table: publicacion. Lista de publicaciones con sus atributos
 class Publicacion(db.Model):
 
@@ -24,6 +28,19 @@ class Publicacion(db.Model):
 
 	# Columna con el contenido de la publicación 
     contenido = db.Column( db.String(255) )
+
+# Class template of expected JSON structured posts. No fields are excluded but one may wish to not expose confidential fields
+class Publicacion_Schema(ma.Schema):
+
+    class Meta:
+
+        fields = ("id", "titulo", "contenido")
+
+# Single schema for single posts
+post_schema = Publicacion_Schema()
+
+# Multiple shemas for multiple posts
+posts_schema = Publicacion_Schema(many = True)
 
 # Main execute
 if __name__ == '__main__':
